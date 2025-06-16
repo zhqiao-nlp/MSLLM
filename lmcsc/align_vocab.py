@@ -10,7 +10,6 @@ class LLM_to_TraditionalModel_Vocab:
     def __init__(self, vocab, is_bytes_level, vocab_size):
         self.vocab = vocab
         self.is_bytes_level = is_bytes_level
-        # self.align_vocab = torch.ones(len(self.vocab), 10).int().cuda()
         self.align_vocab = torch.ones(vocab_size, 10).int().cuda()
         self.relm_vocab = [i.strip() for i in open("/bert-base-chinese/vocab.txt")]
         self.traditional_model_vocab = defaultdict(int)

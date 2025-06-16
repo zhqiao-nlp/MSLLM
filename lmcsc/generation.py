@@ -99,7 +99,6 @@ def get_small_model_probs(
         for beam_index, step in enumerate(step_sequences):
             # if (sentence_id + batch_index, step) in cache:
             if (sentence_id[batch_index], step) in cache:
-                # batch_beam_probs[batch_index, beam_index] = cache[(sentence_id + batch_index, step)]
                 batch_beam_probs[batch_index, beam_index] = cache[(sentence_id[batch_index], step)]
             else:
                 if len(batch_observed_sequences[batch_index][beam_index]) != 0:
@@ -314,7 +313,6 @@ def distortion_guided_beam_search(
         if return_dict_in_generate is not None
         else self.generation_config.return_dict_in_generate
     )
-    # print("return_dict_in_generate", return_dict_in_generate)
     batch_size = len(beam_scorer._beam_hyps)
     num_beams = beam_scorer.num_beams
 
@@ -325,7 +323,6 @@ def distortion_guided_beam_search(
         # In this case, we don't provide prompt or context, so we need to generate the first token
         input_ids = torch.ones((batch_size, 1), device=self.device, dtype=torch.long)
         input_ids = input_ids * self.config.decoder_start_token_id
-    # print("input_ids", input_ids)
     input_ids, model_kwargs = self._expand_inputs_for_generation(
         input_ids=input_ids, expand_size=num_beams, **model_kwargs
     )
@@ -334,7 +331,6 @@ def distortion_guided_beam_search(
         model_kwargs = self._get_initial_cache_position(input_ids, model_kwargs)
     except:
         pass
-    # print("input_ids", input_ids)
     vocab_size = self.vocab_size
 
     # template for the distortion model
@@ -352,8 +348,6 @@ def distortion_guided_beam_search(
     ## END of modification
 
     batch_beam_size, cur_len = input_ids.shape
-    # print("batch_beam_size", batch_beam_size)
-    # print("cur_len", cur_len)
     if num_beams * batch_size != batch_beam_size:
         raise ValueError(
             f"Batch dimension of `input_ids` should be {num_beams * batch_size}, but is {batch_beam_size}."
@@ -391,7 +385,6 @@ def distortion_guided_beam_search(
     )
     beam_scores[:, 1:] = -1e9
     beam_scores = beam_scores.view((batch_size * num_beams,))
-    # print("beam_scores", beam_scores, beam_scores.shape)
     this_peer_finished = False  # used by synced_gpus only
 
     decoder_prompt_len = input_ids.shape[-1]  # record the prompt length of decoder
@@ -407,12 +400,7 @@ def distortion_guided_beam_search(
             # did all peers finish? the reduced sum will be 0.0 then
             if this_peer_finished_flag.item() == 0.0:
                 break
-        # print("input_ids", input_ids)
         model_inputs = self.prepare_inputs_for_generation(input_ids, **model_kwargs)
-        # print("model_inputs", model_inputs['input_ids'])
-        # print("model_inputs", model_inputs['position_ids'])
-        # print("model_inputs", model_inputs['attention_mask'])
-        # print("model_inputs", model_inputs.keys())
         outputs = self(
             **model_inputs,
             return_dict=True,
@@ -425,8 +413,6 @@ def distortion_guided_beam_search(
         observed_sequences = observed_sequence_generator.get_observed_sequences()
         true_steps = observed_sequence_generator.get_true_steps()
         steps = observed_sequence_generator.get_steps()
-        # print("observed_sequences", observed_sequences)
-        # print("steps", steps)
         _batch_indices, _beam_indices, _token_indices, _distortion_probs = (
             self.get_distortion_probs(observed_sequences, eos_token_id)
         )
@@ -475,6 +461,7 @@ def distortion_guided_beam_search(
         next_token_scores = next_token_scores + faithfulness_coefficient * (
                 self.alpha * small_model_probs + self.beta * distortion_probs
         )
+        
         next_token_scores_processed = logits_processor(input_ids, next_token_scores)
         next_token_scores = next_token_scores_processed + beam_scores[
             :, None

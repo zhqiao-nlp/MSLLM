@@ -22,11 +22,8 @@ class AutoCSCReLM(BertForMaskedLM):
         )
 
         sequence_output = outputs[0]
-        # print(sequence_output.shape)
         logits = self.cls(sequence_output)
         loss_fct = nn.CrossEntropyLoss()  # -100 index = padding token
-        # print(labels.view(-1))  # 表示为index，维度[1, 128]，也可表示为one-hot，维度[128, 21128]
-        # print(logits.view(-1, self.num_labels))  # [128, 21128]， nn.CrossEntropyLoss()会自动求softmax然后取对数
         loss = loss_fct(logits.view(-1, self.num_labels), labels.view(-1))
 
         probs = nn.functional.log_softmax(logits, -1)
@@ -35,7 +32,6 @@ class AutoCSCReLM(BertForMaskedLM):
         length = [attention_mask[i].sum().item() for i in range(attention_mask.shape[0])]
         for i in range(src.shape[0]):
             src[i, (length[i] + 1) // 2:length[i] - 1] = src[i, 1:(length[i] - 1) // 2]
-            # prob_distribute[i, ...] = probs[i, (length[i] + 1) // 2: (length[i] + 1) // 2 + 62]
             
         for i in range(src.shape[0]):
             prob_distribute[i, ...] = probs[i, (length[i] + 1) // 2: (length[i] + 1) // 2 + 62]
@@ -46,7 +42,6 @@ class AutoCSCReLM(BertForMaskedLM):
             "loss": loss,
             "predict_ids": predict_ids,
             "prob_distribute": prob_distribute,
-            # "top1_prob": top1_prob,
         }
 
 

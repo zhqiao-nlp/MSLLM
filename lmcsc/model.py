@@ -166,24 +166,6 @@ class LMCSCModel:
             "UNR": -14.99,
         }
 
-        # self.model.distortion_probs = {
-        #     "IDT": -0.04,
-        #     "SAP": -3.75,
-        #     "SIP": -6.50,
-        #     "SIS": -6.50,
-        #     "OTH": -8.91,
-        #     "UNR": -11.0,
-        # }
-
-        # self.model.distortion_probs = {
-        #     "IDT": -0.01,
-        #     "SAP": -3.0,
-        #     "SIP": -5.00,
-        #     "SIS": -6.50,
-        #     "OTH": -8.91,
-        #     "UNR": -10.0,
-        # }
-
         self.model.distortion_model_smoothing = self.distortion_model_smoothing
         self.model.use_faithfulness_reward = self.use_faithfulness_reward
         self.model.max_entropy = (

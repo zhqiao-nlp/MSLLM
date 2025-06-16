@@ -11,8 +11,6 @@ from lmcsc.common import OOV_CHAR
 from lmcsc.utils import clean_sentences, rebuild_sentences
 from accelerate import Accelerator
 from lmcsc.autocsc import *
-# from lmcsc.autocsc_DISC import *
-# from lmcsc.autocsc_only_DISC import *
 from transformers import AutoTokenizer
 from torch.utils.data import DataLoader, TensorDataset, IterableDataset
 from tqdm.auto import tqdm, trange
@@ -260,9 +258,7 @@ if __name__ == "__main__":
     src_index, reordered_sources = zip(
         *sorted(enumerate(sources), key=lambda x: len(x[1]), reverse=True)
     )
-    # src_index, reordered_sources = zip(*enumerate(sources))
     reorder_index, _ = zip(*sorted(enumerate(src_index), key=lambda x: x[1]))
-    # reordered_sources = sources
 
     hypos = []
 
@@ -346,17 +342,6 @@ if __name__ == "__main__":
             )
             for o, s in zip(output, ori_batch)
         ]
-
-        # # 过滤“的”、“地”、“得”字符的修改
-        # output = [
-        #     "".join(
-        #         [
-        #             o_char if s_char not in ["的", "地", "得"] else s_char
-        #             for o_char, s_char in zip(o, s)
-        #         ]
-        #     )
-        #     for o, s in zip(output, ori_batch)
-        # ]
 
         print(output[0])
         hypos.extend(output)
